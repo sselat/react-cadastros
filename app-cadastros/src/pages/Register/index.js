@@ -99,14 +99,20 @@ export default function Register() {
           <div className="p-inputgroup">
             <span
               className="p-inputgroup-addon"
-              style={{backgroundColor: 'var(--highlight-bg'}}
+              style={
+                isValidEmail
+                  ? {backgroundColor: 'var(--highlight-bg'}
+                  : {backgroundColor: 'var(--red-200)'}
+              }
             >
               <i
                 className="pi pi-envelope"
-                style={{
-                  color: 'var(--primary-color)'
-                }}
-              ></i>
+                style={
+                  isValidEmail
+                    ? {color: 'var(--primary-color)'}
+                    : {color: 'var(--red-600'}
+                }
+              />
             </span>
             <InputText
               className={isValidEmail ? '' : 'p-invalid'}
@@ -131,7 +137,7 @@ export default function Register() {
                 style={{
                   color: 'var(--primary-color)'
                 }}
-              ></i>
+              />
             </span>
             <InputText
               className={isValidPassword ? '' : 'p-invalid'}
@@ -154,7 +160,7 @@ export default function Register() {
                 style={{
                   color: 'var(--primary-color)'
                 }}
-              ></i>
+              />
             </span>
             <InputText
               className={isValidPassword ? '' : 'p-invalid'}

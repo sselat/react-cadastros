@@ -23,6 +23,11 @@ export default function RoutesApp() {
           </Private>
         }
       />
+
+      <Route
+        path="*"
+        element={<Home />}
+      />
     </Routes>
   )
 }

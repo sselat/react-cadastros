@@ -15,11 +15,19 @@ export default function Home() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [validField, setValidField] = useState(true)
+  const [isValidEmail, setIsValidEmail] = useState(true)
+  const [isValidPassword, setIsValidPassword] = useState(true)
 
   const navigate = useNavigate()
 
   async function handleLogin() {
-    if (email !== '' && password !== '') {
+    if (!validateEmail()) {
+      return
+    }
+    if (!validatePassword()) {
+      return
+    }
+    if (isValidEmail && isValidPassword) {
       await signInWithEmailAndPassword(auth, email, password)
         .then(() => {
           toast.success('Logado com sucesso!')
@@ -52,6 +60,29 @@ export default function Home() {
       />
     </div>
   )
+  const validateEmail = () => {
+    if (email === '') {
+      toast.warn('Digite um endereço de e-mail!')
+      setIsValidEmail(false)
+      return false
+    } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(email)) {
+      setIsValidEmail(false)
+      toast.error('O e-mail digitado é inválido!')
+      return false
+    } else {
+      setIsValidEmail(true)
+      return true
+    }
+  }
+  const validatePassword = () => {
+    if (password.length < 6) {
+      setIsValidPassword(false)
+      toast.error('Senha inválida!')
+      return false
+    } else {
+      return true
+    }
+  }
   return (
     <div
       className="flex flex-column justify-content-center align-items-center gap-2"
@@ -67,17 +98,23 @@ export default function Home() {
           <div className="p-inputgroup">
             <span
               className="p-inputgroup-addon"
-              style={{backgroundColor: 'var(--highlight-bg'}}
+              style={
+                validField && isValidEmail
+                  ? {backgroundColor: 'var(--highlight-bg'}
+                  : {backgroundColor: 'var(--red-200)'}
+              }
             >
               <i
                 className="pi pi-envelope"
-                style={{
-                  color: 'var(--primary-color)'
-                }}
-              ></i>
+                style={
+                  validField && isValidEmail
+                    ? {color: 'var(--primary-color)'}
+                    : {color: 'var(--red-600'}
+                }
+              />
             </span>
             <InputText
-              className={validField ? '' : 'p-invalid'}
+              className={validField && isValidEmail ? '' : 'p-invalid'}
               placeholder="Digite o seu email"
               type="email"
               value={email}
@@ -90,17 +127,23 @@ export default function Home() {
           <div className="p-inputgroup">
             <span
               className="p-inputgroup-addon"
-              style={{backgroundColor: 'var(--highlight-bg'}}
+              style={
+                validField && isValidPassword
+                  ? {backgroundColor: 'var(--highlight-bg'}
+                  : {backgroundColor: 'var(--red-200)'}
+              }
             >
               <i
                 className="pi pi-lock"
-                style={{
-                  color: 'var(--primary-color)'
-                }}
+                style={
+                  validField && isValidPassword
+                    ? {color: 'var(--primary-color)'}
+                    : {color: 'var(--red-600'}
+                }
               ></i>
             </span>
             <InputText
-              className={validField ? '' : 'p-invalid'}
+              className={validField && isValidPassword ? '' : 'p-invalid'}
               placeholder="Digite a sua senha"
               type="password"
               value={password}
@@ -114,7 +157,6 @@ export default function Home() {
         </div>
       </Card>
       <Button
-        // onClick={navigate('/register', {replace: true})}
         onClick={goToRegister}
         text
       >
