@@ -30,8 +30,8 @@ export default function Management() {
     return (
       <div className="sideBar opened flex flex-column align-items-center gap-3 transition-all transition-duration-500">
         <Button
-          className="absolut top-0 w-12"
-          icon="pi pi-caret-left"
+          className="absolut mt-2 mx-2 w-11"
+          icon="pi pi-arrow-left"
           iconPos="right"
           severity="info"
           raised
@@ -62,7 +62,8 @@ export default function Management() {
     return (
       <div className="sideBar closed transition-all transition-duration-500 flex flex-column align-items-center">
         <Button
-          icon="pi pi-caret-right"
+          className="mt-2"
+          icon="pi pi-arrow-right"
           severity="info"
           raised
           style={{

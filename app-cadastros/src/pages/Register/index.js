@@ -31,7 +31,7 @@ export default function Register() {
       await createUserWithEmailAndPassword(auth, email, password)
         .then(() => {
           toast.success('Cadastro criado com sucesso!')
-          navigate('/admin', {replace: true})
+          navigate('/home', {replace: true})
         })
         .catch(() => toast.error('Erro ao cadastrar!'))
     } else {
