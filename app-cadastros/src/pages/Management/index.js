@@ -6,10 +6,17 @@ import {CustomersDatatable} from '../../components/Management/Datatable'
 import {Avatar} from 'primereact/avatar'
 
 import './management.css'
-import {useState} from 'react'
+import {useEffect, useState} from 'react'
 
 export default function Management() {
   const [showSideBar, setShowSideBar] = useState(false)
+  const [user, setUser] = useState({})
+
+  useEffect(() => {
+    const userDetail = localStorage.getItem('@activeUser')
+    setUser(JSON.parse(userDetail))
+  }, [])
+
   const dataTableStyle = {
     transition: '.5s all',
     marginLeft: '200px'
@@ -28,9 +35,6 @@ export default function Management() {
           iconPos="right"
           severity="info"
           raised
-          style={{
-            border: '1px solid var(--primary-color)'
-          }}
           onClick={() => setShowSideBar(false)}
         />
         <h2 className="mt-8">Provider IT</h2>
@@ -44,7 +48,7 @@ export default function Management() {
             height: '8rem'
           }}
         />
-        <p>tales@teste.com</p>
+        <p>{user.email}</p>
         <Button
           className="transition-all transition-duration-300 mt-8 hover:bg-red-500 hover:border-red-900"
           severity="primary"
@@ -79,6 +83,7 @@ export default function Management() {
     <div className="container">
       {showSideBar ? openedSideBar() : closedSideBar()}
       <CustomersDatatable
+        user={user}
         style={
           showSideBar
             ? dataTableStyle

@@ -21,7 +21,6 @@ import {EditCustomer} from './EditCustomer.js'
 import {toast} from 'react-toastify'
 
 export function CustomersDatatable(props) {
-  const [expandedRows, setExpandedRows] = useState(null)
   const [customers, setCustomers] = useState([])
   const [customerToEdit, setCustomerToEdit] = useState({})
   const [filters, setFilters] = useState({
@@ -160,32 +159,15 @@ export function CustomersDatatable(props) {
       .then(() => toast.info('Excluído com sucesso!'))
       .catch((error) => toast.error('Falha ao excluir o cliente!'))
   }
-
-  // const birthDateFilter = () => {
-  //   return (
-  //     <InputMask
-  //       mask="99/99/9999"
-  //       value={filters.birthDate.value}
-  //       onChange={(e) =>
-  //         setFilters({
-  //           ...filters,
-  //           birthDate: {
-  //             value: e.target.value,
-  //             matchMode: FilterMatchMode.STARTS_WITH
-  //           }
-  //         })
-  //       }
-  //       style={{minWidth: '14rem'}}
-  //     />
-  //   )
-  // }
   return (
     <div style={props.style}>
       <CustomerDialog
+        user={props.user}
         show={customerDialog}
         onClose={() => setCustomerDialog(false)}
       />
       <EditCustomer
+        user={props.user}
         customerToEdit={customerToEdit}
         show={showEditDialog}
         onClose={() => setShowEditDialog(false)}

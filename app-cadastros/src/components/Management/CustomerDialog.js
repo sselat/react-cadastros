@@ -47,6 +47,7 @@ export function CustomerDialog(props) {
   })
   const [addressFields, setAddresFields] = useState(true)
   const [isCepValid, setIsCepValid] = useState(true)
+  const [isCpfValid, setIsCpfValid] = useState(true)
   const [customGender, setCustomGender] = useState(false)
   const [user, setUser] = useState({})
 
@@ -82,9 +83,8 @@ export function CustomerDialog(props) {
   }, [customGender])
 
   useEffect(() => {
-    const userDetail = localStorage.getItem('@activeUser')
-    setUser(JSON.parse(userDetail))
-  }, [])
+    setUser(props.user)
+  }, [props.user])
 
   async function registerCustomer() {
     const customerInfo = {
@@ -128,6 +128,29 @@ export function CustomerDialog(props) {
       return true
     }
   }
+  const validarCPF = (cpf) => {
+    cpf = cpf.replace(/[^\d]+/g, '')
+    if (cpf === '') return false
+    if (cpf.length !== 11 || /^(\d)\1{10}$/.test(cpf)) return false
+
+    var soma = 0,
+      resto
+
+    for (let i = 1; i <= 9; i++) {
+      soma = soma + parseInt(cpf.substring(i - 1, i)) * (11 - i)
+    }
+    resto = (soma * 10) % 11
+    if (resto === 10 || resto === 11) resto = 0
+    if (resto !== parseInt(cpf.substring(9, 10))) return false
+    soma = 0
+    for (let i = 1; i <= 10; i++) {
+      soma = soma + parseInt(cpf.substring(i - 1, i)) * (12 - i)
+    }
+    resto = (soma * 10) % 11
+    if (resto === 10 || resto === 11) resto = 0
+    if (resto !== parseInt(cpf.substring(10, 11))) return false
+    return true
+  }
 
   function resetColors() {
     const newValidInput = Object.keys(validInput).reduce((acc, key) => {
@@ -139,10 +162,16 @@ export function CustomerDialog(props) {
 
   function handleSubmit() {
     resetColors()
+    setIsCpfValid(true)
+    const cpf = validarCPF(customerDetails.cpf)
+    if (!cpf) {
+      setIsCpfValid(false)
+      showError('CPF Inválido!')
+      return
+    }
     const dados = validarDados()
     const endereco = validarEndereco()
-
-    if (dados && endereco) {
+    if (dados && endereco && cpf) {
       registerCustomer()
     } else {
       showError('Verifique os campos obrigatórios!')
@@ -168,6 +197,7 @@ export function CustomerDialog(props) {
     })
     setAddresFields(true)
     setCustomGender(false)
+    setIsCpfValid(true)
     props.onClose()
   }
 
@@ -258,7 +288,7 @@ export function CustomerDialog(props) {
             CPF <span className="text-red-500">*</span>
           </label>
           <InputMask
-            style={validInput.cpf ? {} : {borderColor: 'var(--red-500)'}}
+            style={isCpfValid ? {} : {borderColor: 'var(--red-500)'}}
             mask="999.999.999-99"
             placeholder="xxx.xxx.xxx-xx"
             id="cpf"
