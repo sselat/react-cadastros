@@ -1,27 +1,38 @@
 import {useState, useEffect} from 'react'
 import {db} from '../../services/FirebaseServices'
-import {collection, onSnapshot, query, orderBy} from 'firebase/firestore'
+import {
+  collection,
+  onSnapshot,
+  query,
+  orderBy,
+  doc,
+  deleteDoc
+} from 'firebase/firestore'
 
 import {DataTable} from 'primereact/datatable'
 import {FilterMatchMode} from 'primereact/api'
 import {Column} from 'primereact/column'
 import {InputText} from 'primereact/inputtext'
 import {Button} from 'primereact/button'
+import {ConfirmDialog, confirmDialog} from 'primereact/confirmdialog'
 
 import {CustomerDialog} from './CustomerDialog.js'
-import {InputMask} from 'primereact/inputmask'
+import {EditCustomer} from './EditCustomer.js'
+import {toast} from 'react-toastify'
 
 export function CustomersDatatable(props) {
   const [customers, setCustomers] = useState([])
+  const [customerToEdit, setCustomerToEdit] = useState({})
   const [filters, setFilters] = useState({
     global: {value: null, matchMode: FilterMatchMode.CONTAINS},
-    name: {value: null, matchMode: FilterMatchMode.STARTS_WITH},
+    name: {value: null, matchMode: FilterMatchMode.CONTAINS},
     birthDate: {value: null, matchMode: FilterMatchMode.CONTAINS},
     phone: {value: null, matchMode: FilterMatchMode.CONTAINS}
   })
   const [loading, setLoading] = useState(false)
   const [globalFilterValue, setGlobalFilterValue] = useState('')
   const [customerDialog, setCustomerDialog] = useState(false)
+  const [showEditDialog, setShowEditDialog] = useState(false)
 
   const onGlobalFilterChange = (e) => {
     const value = e.target.value
@@ -47,10 +58,25 @@ export function CustomersDatatable(props) {
             id: doc.id,
             name: doc.data().name,
             birthDate: doc.data().birthDate,
-            phone: doc.data().phone,
+            phone: doc
+              .data()
+              .phone.replace(/[^\w\s]/gi, '')
+              .replace(/\s/gi, ''),
+            optionalPhone: doc
+              .data()
+              .optionalPhone.replace(/[^\w\s]/gi, '')
+              .replace(/\s/gi, ''),
             cpf: doc.data().cpf,
             gender: doc.data().gender,
-            address: doc.data().address
+            createdBy: doc.data().createdBy,
+            cep: doc.data().cep,
+            logradouro: doc.data().logradouro,
+            houseNumber: doc.data().houseNumber,
+            bairro: doc.data().bairro,
+            complemento: doc.data().complemento,
+            cidade: doc.data().cidade,
+            uf: doc.data().uf,
+            customGender: doc.data().customGender
           })
         })
         setCustomers(lista)
@@ -95,7 +121,7 @@ export function CustomersDatatable(props) {
           icon="pi pi-user-edit"
           text
           rounded
-          onClick={() => editCustomer(data)}
+          onClick={() => openEditDialog(data)}
         />
         <Button
           className="transition-all transition-duration-300 hover:bg-red-50"
@@ -103,14 +129,35 @@ export function CustomersDatatable(props) {
           icon="pi pi-trash"
           rounded
           text
-          onClick={() => editCustomer(data)}
+          onClick={() => confirmDelete(data)}
         />
       </div>
     )
   }
 
-  const editCustomer = (data) => {
-    console.log(data)
+  const openEditDialog = (data) => {
+    setCustomerToEdit(data)
+    setShowEditDialog(true)
+  }
+
+  function confirmDelete(data) {
+    confirmDialog({
+      message: 'Tem certeza de que deseja excluir?',
+      icon: 'pi pi-info-circle',
+      header: 'Confirmar ação',
+      acceptClassName: 'p-button-danger',
+      acceptLabel: 'Excluir',
+      rejectLabel: 'Cancelar',
+      accept: () => deleteCustomer(data),
+      reject: false
+    })
+  }
+
+  const deleteCustomer = async (data) => {
+    const docRef = doc(db, 'clientes', data.id)
+    await deleteDoc(docRef)
+      .then(() => toast.info('Excluído com sucesso!'))
+      .catch((error) => toast.error('Falha ao excluir o cliente!'))
   }
 
   // const birthDateFilter = () => {
@@ -137,6 +184,13 @@ export function CustomersDatatable(props) {
         show={customerDialog}
         onClose={() => setCustomerDialog(false)}
       />
+      <EditCustomer
+        customerToEdit={customerToEdit}
+        show={showEditDialog}
+        onClose={() => setShowEditDialog(false)}
+      />
+
+      <ConfirmDialog />
       <DataTable
         header={header}
         loading={loading}

@@ -1,6 +1,6 @@
 import {useState, useEffect, useRef} from 'react'
 import {db} from '../../services/FirebaseServices'
-import {addDoc, collection} from 'firebase/firestore'
+import {updateDoc, doc} from 'firebase/firestore'
 
 import {InputText} from 'primereact/inputtext'
 import {InputMask} from 'primereact/inputmask'
@@ -12,23 +12,9 @@ import {Divider} from 'primereact/divider'
 
 import {toast as toastify} from 'react-toastify'
 
-export function CustomerDialog(props) {
+export function EditCustomer(props) {
   const [customerDetails, setCustomerDetails] = useState({
-    name: '',
-    cpf: '',
-    birthDate: '',
-    phone: '',
-    optionalPhone: '',
-    gender: 'Masculino'
-  })
-  const [customerAddress, setCustomerAddress] = useState({
-    cep: '',
-    logradouro: '',
-    houseNumber: '',
-    bairro: '',
-    complemento: '',
-    cidade: '',
-    uf: ''
+    ...props.customerToEdit
   })
   const [validInput, setValidInput] = useState({
     name: true,
@@ -45,17 +31,18 @@ export function CustomerDialog(props) {
     cidade: true,
     uf: true
   })
-  const [addressFields, setAddresFields] = useState(true)
+  const [addressFields, setAddressFields] = useState(true)
   const [isCepValid, setIsCepValid] = useState(true)
   const [customGender, setCustomGender] = useState(false)
   const [user, setUser] = useState({})
+  const editingCustomer = props.customerToEdit
 
   const toast = useRef(null)
-
   useEffect(() => {
     function checarCep() {
-      if (!customerAddress.cep) {
-        setCustomerAddress({
+      if (!customerDetails.cep) {
+        setCustomerDetails({
+          ...customerDetails,
           logradouro: '',
           houseNumber: '',
           bairro: '',
@@ -63,12 +50,12 @@ export function CustomerDialog(props) {
           cidade: '',
           uf: ''
         })
-        setAddresFields(true)
+        setAddressFields(true)
         setIsCepValid(true)
       }
     }
     checarCep()
-  }, [customerAddress.cep])
+  }, [customerDetails.cep])
   useEffect(() => {
     function createCustomGender() {
       if (customGender) {
@@ -86,42 +73,37 @@ export function CustomerDialog(props) {
     setUser(JSON.parse(userDetail))
   }, [])
 
-  async function registerCustomer() {
+  useEffect(() => {
+    setCustomerDetails(props.customerToEdit)
+  }, [props.customerToEdit])
+
+  async function editCustomer() {
     const customerInfo = {
       ...customerDetails,
-      ...customerAddress,
-      customGender: customGender,
-      createdBy: user.uid
+      lastEditBy: user.uid
     }
-    await addDoc(collection(db, 'clientes'), customerInfo)
+    const docRef = doc(db, 'clientes', customerDetails.id)
+    await updateDoc(docRef, customerInfo)
       .then(() => {
-        toastify.success('Cliente cadastrado com sucesso!')
-        closeDialog()
+        toastify.success('Cadastro atualizada!')
+        closeDialog('edited')
       })
-      .catch((error) => toastify.error(`Erro ao registrar: ${error}`))
+      .catch(() => toastify.error('Não foi possível realizar a ação!'))
   }
+
   function validarDados() {
     let hasError = false
     Object.keys(customerDetails).forEach((key) => {
-      if (key !== 'optionalPhone' && customerDetails[key].length === 0) {
+      if (
+        key !== 'optionalPhone' &&
+        key !== 'complemento' &&
+        customerDetails[key].length === 0
+      ) {
         hasError = true
         setValidInput((prevState) => ({...prevState, [key]: false}))
       }
     })
-    if (hasError) {
-      return false
-    } else {
-      return true
-    }
-  }
-  const validarEndereco = () => {
-    let hasError = false
-    Object.keys(customerAddress).forEach((key) => {
-      if (key !== 'complemento' && customerAddress[key].length === 0) {
-        hasError = true
-        setValidInput((prevState) => ({...prevState, [key]: false}))
-      }
-    })
+
     if (hasError) {
       return false
     } else {
@@ -137,48 +119,32 @@ export function CustomerDialog(props) {
     setValidInput(newValidInput)
   }
 
-  function handleSubmit() {
+  function handleEdit() {
     resetColors()
     const dados = validarDados()
-    const endereco = validarEndereco()
 
-    if (dados && endereco) {
-      registerCustomer()
+    if (dados) {
+      editCustomer()
     } else {
       showError('Verifique os campos obrigatórios!')
     }
   }
-  function closeDialog() {
-    resetColors()
-    setCustomerDetails({
-      name: '',
-      cpf: '',
-      birthDate: '',
-      phone: '',
-      optionalPhone: '',
-      gender: 'Masculino'
-    })
-    setCustomerAddress({
-      logradouro: '',
-      houseNumber: '',
-      bairro: '',
-      complemento: '',
-      cidade: '',
-      uf: ''
-    })
-    setAddresFields(true)
-    setCustomGender(false)
+  function closeDialog(callback) {
+    if (!callback) {
+      setCustomerDetails(props.customerToEdit)
+    }
+    setAddressFields(true)
     props.onClose()
   }
 
   function buscarCep() {
-    if (!customerAddress.cep) {
+    if (!customerDetails.cep) {
       setIsCepValid(false)
       showError('CEP inválido!')
       return
     } else {
       setIsCepValid(true)
-      const apiUrl = `https://viacep.com.br/ws/${customerAddress.cep}/json/`
+      const apiUrl = `https://viacep.com.br/ws/${customerDetails.cep}/json/`
 
       fetch(apiUrl)
         .then((response) => response.json())
@@ -187,15 +153,15 @@ export function CustomerDialog(props) {
             showError('CEP inválido!')
           } else {
             preencherEndereco(data)
-            setAddresFields(false)
+            setAddressFields(false)
           }
         })
     }
   }
 
   function preencherEndereco(data) {
-    setCustomerAddress({
-      ...customerAddress,
+    setCustomerDetails({
+      ...customerDetails,
       logradouro: data.logradouro,
       bairro: data.bairro,
       cidade: data.localidade,
@@ -206,9 +172,9 @@ export function CustomerDialog(props) {
   function footerButton() {
     return (
       <Button
-        onClick={handleSubmit}
-        className="w-2 hover:bg-green-500"
-        label="Salvar"
+        onClick={handleEdit}
+        className="w-3 hover:bg-green-500"
+        label="Atualizar"
       />
     )
   }
@@ -224,7 +190,7 @@ export function CustomerDialog(props) {
   return (
     <Dialog
       className="flex flex-column"
-      header="Novo cadastro"
+      header="Editar cadastro"
       footer={footerButton}
       visible={props.show}
       style={{width: '50vw', maxWidth: '500px'}}
@@ -412,9 +378,9 @@ export function CustomerDialog(props) {
               mask="99999-999"
               placeholder="12345-789"
               id="cep"
-              value={customerAddress.cep}
+              value={customerDetails.cep}
               onChange={(e) =>
-                setCustomerAddress((prevState) => ({
+                setCustomerDetails((prevState) => ({
                   ...prevState,
                   cep: e.target.value
                 }))
@@ -438,9 +404,9 @@ export function CustomerDialog(props) {
             disabled={addressFields}
             keyfilter="int"
             id="cidade"
-            value={customerAddress.cidade}
+            value={customerDetails.cidade}
             onChange={(e) =>
-              setCustomerAddress((prevState) => ({
+              setCustomerDetails((prevState) => ({
                 ...prevState,
                 cidade: e.target.value
               }))
@@ -455,9 +421,9 @@ export function CustomerDialog(props) {
             style={validInput.uf ? {} : {borderColor: 'var(--red-500)'}}
             disabled={addressFields}
             id="uf"
-            value={customerAddress.uf}
+            value={customerDetails.uf}
             onChange={(e) =>
-              setCustomerAddress((prevState) => ({
+              setCustomerDetails((prevState) => ({
                 ...prevState,
                 uf: e.target.value
               }))
@@ -474,9 +440,9 @@ export function CustomerDialog(props) {
             style={validInput.logradouro ? {} : {borderColor: 'var(--red-500)'}}
             disabled={addressFields}
             id="logradouro"
-            value={customerAddress.logradouro}
+            value={customerDetails.logradouro}
             onChange={(e) =>
-              setCustomerAddress((prevState) => ({
+              setCustomerDetails((prevState) => ({
                 ...prevState,
                 logradouro: e.target.value
               }))
@@ -494,9 +460,9 @@ export function CustomerDialog(props) {
             disabled={addressFields}
             keyfilter="int"
             id="houseNumber"
-            value={customerAddress.houseNumber}
+            value={customerDetails.houseNumber}
             onChange={(e) =>
-              setCustomerAddress((prevState) => ({
+              setCustomerDetails((prevState) => ({
                 ...prevState,
                 houseNumber: e.target.value
               }))
@@ -512,9 +478,9 @@ export function CustomerDialog(props) {
           style={validInput.bairro ? {} : {borderColor: 'var(--red-500)'}}
           disabled={addressFields}
           id="bairro"
-          value={customerAddress.bairro}
+          value={customerDetails.bairro}
           onChange={(e) =>
-            setCustomerAddress((prevState) => ({
+            setCustomerDetails((prevState) => ({
               ...prevState,
               bairro: e.target.value
             }))
@@ -526,9 +492,9 @@ export function CustomerDialog(props) {
         <InputText
           disabled={addressFields}
           id="complemento"
-          value={customerAddress.complemento}
+          value={customerDetails.complemento}
           onChange={(e) =>
-            setCustomerAddress((prevState) => ({
+            setCustomerDetails((prevState) => ({
               ...prevState,
               complemento: e.target.value
             }))
