@@ -3,22 +3,21 @@ import {db} from '../../services/FirebaseServices'
 import {collection, onSnapshot, query, orderBy} from 'firebase/firestore'
 
 import {DataTable} from 'primereact/datatable'
-import {FilterMatchMode, FilterOperator} from 'primereact/api'
+import {FilterMatchMode} from 'primereact/api'
 import {Column} from 'primereact/column'
 import {InputText} from 'primereact/inputtext'
 import {Button} from 'primereact/button'
 
-import {CustomerDialog} from './CustomerDialog'
+import {CustomerDialog} from './CustomerDialog.js'
+import {InputMask} from 'primereact/inputmask'
 
 export function CustomersDatatable(props) {
   const [customers, setCustomers] = useState([])
   const [filters, setFilters] = useState({
     global: {value: null, matchMode: FilterMatchMode.CONTAINS},
     name: {value: null, matchMode: FilterMatchMode.STARTS_WITH},
-    'country.name': {value: null, matchMode: FilterMatchMode.STARTS_WITH},
     birthDate: {value: null, matchMode: FilterMatchMode.CONTAINS},
-    status: {value: null, matchMode: FilterMatchMode.EQUALS},
-    verified: {value: null, matchMode: FilterMatchMode.EQUALS}
+    phone: {value: null, matchMode: FilterMatchMode.CONTAINS}
   })
   const [loading, setLoading] = useState(false)
   const [globalFilterValue, setGlobalFilterValue] = useState('')
@@ -89,7 +88,7 @@ export function CustomersDatatable(props) {
 
   const actionsTemplate = (data) => {
     return (
-      <div className="flex justify-content-center">
+      <div className="flex justify-content-start">
         <Button
           className="transition-all transition-duration-300 hover:bg-primary-50"
           severity="info"
@@ -114,6 +113,24 @@ export function CustomersDatatable(props) {
     console.log(data)
   }
 
+  // const birthDateFilter = () => {
+  //   return (
+  //     <InputMask
+  //       mask="99/99/9999"
+  //       value={filters.birthDate.value}
+  //       onChange={(e) =>
+  //         setFilters({
+  //           ...filters,
+  //           birthDate: {
+  //             value: e.target.value,
+  //             matchMode: FilterMatchMode.STARTS_WITH
+  //           }
+  //         })
+  //       }
+  //       style={{minWidth: '14rem'}}
+  //     />
+  //   )
+  // }
   return (
     <div style={props.style}>
       <CustomerDialog
@@ -127,6 +144,7 @@ export function CustomersDatatable(props) {
         filters={filters}
         paginator
         rows={10}
+        rowClassName={'justify-content-center'}
         dataKey="id"
         filterDisplay="row"
         globalFilterFields={['name']}
@@ -137,26 +155,24 @@ export function CustomersDatatable(props) {
           header="Nome"
           filter
           filterPlaceholder="Buscar por nome..."
-          style={{minWidth: '12rem'}}
         />
         <Column
           field="birthDate"
           header="Data de Nascimento"
           filter
+          filterField="birthDate"
           filterPlaceholder="Buscar por data de nascimento..."
-          style={{minWidth: '12rem'}}
         />
         <Column
           field="phone"
           header="Telefone"
           filter
+          filterField="phone"
           filterPlaceholder="Buscar por telefone..."
-          style={{minWidth: '12rem'}}
         />
         <Column
           header="Ações"
           body={actionsTemplate}
-          style={{minWidth: '12rem'}}
         />
       </DataTable>
     </div>

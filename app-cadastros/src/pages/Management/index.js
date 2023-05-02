@@ -1,17 +1,13 @@
-import {useState} from 'react'
 import {auth} from '../../services/FirebaseServices'
 import {signOut} from 'firebase/auth'
 
 import {Button} from 'primereact/button'
-import {InputText} from 'primereact/inputtext'
 import {CustomersDatatable} from '../../components/Management/Datatable'
 import {Avatar} from 'primereact/avatar'
 
 import './management.css'
 
 export default function Management() {
-  const [newCustomerName, setNewCustomerName] = useState()
-  const [newCustomerBirthDate, setNewCustomerBirthDate] = useState()
   const dataTableStyle = {
     marginLeft: '200px'
   }
