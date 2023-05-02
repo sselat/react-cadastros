@@ -91,7 +91,7 @@ export function CustomerDialog(props) {
       ...customerDetails,
       ...customerAddress,
       customGender: customGender,
-      createdBy: user.uid
+      createdBy: user
     }
     await addDoc(collection(db, 'clientes'), customerInfo)
       .then(() => {

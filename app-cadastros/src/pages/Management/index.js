@@ -6,9 +6,12 @@ import {CustomersDatatable} from '../../components/Management/Datatable'
 import {Avatar} from 'primereact/avatar'
 
 import './management.css'
+import {useState} from 'react'
 
 export default function Management() {
+  const [showSideBar, setShowSideBar] = useState(false)
   const dataTableStyle = {
+    transition: '.5s all',
     marginLeft: '200px'
   }
   async function handleLogout() {
@@ -16,10 +19,21 @@ export default function Management() {
       localStorage.clear()
     })
   }
-  return (
-    <div className="container">
-      <div className="sideBar flex flex-column align-items-center gap-3 pt-8">
-        <h2>Provider IT</h2>
+  const openedSideBar = () => {
+    return (
+      <div className="sideBar opened flex flex-column align-items-center gap-3 transition-all transition-duration-500">
+        <Button
+          className="absolut top-0 w-12"
+          icon="pi pi-caret-left"
+          iconPos="right"
+          severity="info"
+          raised
+          style={{
+            border: '1px solid var(--primary-color)'
+          }}
+          onClick={() => setShowSideBar(false)}
+        />
+        <h2 className="mt-8">Provider IT</h2>
         <Avatar
           icon="pi pi-user"
           size="xlarge"
@@ -38,7 +52,39 @@ export default function Management() {
           onClick={handleLogout}
         />
       </div>
-      <CustomersDatatable style={dataTableStyle} />
+    )
+  }
+  const closedSideBar = () => {
+    return (
+      <div className="sideBar closed transition-all transition-duration-500 flex flex-column align-items-center">
+        <Button
+          icon="pi pi-caret-right"
+          severity="info"
+          raised
+          style={{
+            maxWidth: '50px'
+          }}
+          onClick={() => setShowSideBar(true)}
+        />
+        <Button
+          className="transition-all transition-duration-300 mt-8 hover:bg-red-500 hover:border-red-900"
+          severity="primary"
+          icon="pi pi-sign-out"
+          onClick={handleLogout}
+        />
+      </div>
+    )
+  }
+  return (
+    <div className="container">
+      {showSideBar ? openedSideBar() : closedSideBar()}
+      <CustomersDatatable
+        style={
+          showSideBar
+            ? dataTableStyle
+            : {marginLeft: '50px', transition: '.5s all'}
+        }
+      />
     </div>
   )
 }

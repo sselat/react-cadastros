@@ -21,6 +21,7 @@ import {EditCustomer} from './EditCustomer.js'
 import {toast} from 'react-toastify'
 
 export function CustomersDatatable(props) {
+  const [expandedRows, setExpandedRows] = useState(null)
   const [customers, setCustomers] = useState([])
   const [customerToEdit, setCustomerToEdit] = useState({})
   const [filters, setFilters] = useState({
@@ -197,6 +198,8 @@ export function CustomersDatatable(props) {
         value={customers}
         filters={filters}
         paginator
+        resizableColumns
+        showGridlines
         rows={10}
         rowClassName={'justify-content-center'}
         dataKey="id"
@@ -205,27 +208,37 @@ export function CustomersDatatable(props) {
         emptyMessage="Sem clientes cadastrados."
       >
         <Column
+          sortable
+          headerClassName="text-primary text-lg"
           field="name"
           header="Nome"
+          alignHeader="center"
           filter
           filterPlaceholder="Buscar por nome..."
         />
         <Column
+          sortable
+          headerClassName="text-primary text-lg"
           field="birthDate"
           header="Data de Nascimento"
+          alignHeader="center"
           filter
           filterField="birthDate"
           filterPlaceholder="Buscar por data de nascimento..."
         />
         <Column
+          headerClassName="text-primary text-lg"
           field="phone"
           header="Telefone"
+          alignHeader="center"
           filter
           filterField="phone"
           filterPlaceholder="Buscar por telefone..."
         />
         <Column
+          headerClassName="text-primary text-lg"
           header="Ações"
+          alignHeader="center"
           body={actionsTemplate}
         />
       </DataTable>

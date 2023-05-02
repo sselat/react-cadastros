@@ -35,7 +35,6 @@ export function EditCustomer(props) {
   const [isCepValid, setIsCepValid] = useState(true)
   const [customGender, setCustomGender] = useState(false)
   const [user, setUser] = useState({})
-  const editingCustomer = props.customerToEdit
 
   const toast = useRef(null)
   useEffect(() => {
