@@ -56,6 +56,7 @@ export function EditCustomer(props) {
     }
     checarCep()
   }, [customerDetails.cep])
+
   useEffect(() => {
     function createCustomGender() {
       if (customGender) {
@@ -74,6 +75,7 @@ export function EditCustomer(props) {
 
   useEffect(() => {
     setCustomerDetails(props.customerToEdit)
+    setCustomGender(props.customerToEdit.customGender)
   }, [props.customerToEdit])
 
   async function editCustomer() {
