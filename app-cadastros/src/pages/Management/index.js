@@ -37,7 +37,7 @@ export default function Management() {
           raised
           onClick={() => setShowSideBar(false)}
         />
-        <h2 className="mt-8">Provider IT</h2>
+        <h2 className="mt-8 text-primary">Provider IT</h2>
         <Avatar
           icon="pi pi-user"
           size="xlarge"

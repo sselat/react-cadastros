@@ -10,7 +10,6 @@ import {InputText} from 'primereact/inputtext'
 
 //util imports
 import {toast} from 'react-toastify'
-
 export default function Home() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -88,6 +87,7 @@ export default function Home() {
       className="flex flex-column justify-content-center align-items-center gap-2"
       style={{height: '100vh'}}
     >
+      {/* <ThemeToggle /> */}
       <Card
         title="Entrar no sistema"
         footer={footer}

@@ -8,8 +8,7 @@
   width: 200px;
   height: 100vh;
   max-height: 100vh;
-  background-color: var(--primary-100);
-  border-right: 1px solid var(--primary-400);
+  border-right: 1px solid var(--primary-500);
 }
 
 .sideBar.closed {
@@ -19,6 +18,5 @@
   width: 50px;
   height: 100vh;
   max-height: 100vh;
-  background-color: var(--primary-100);
   border-right: 1px solid var(--primary-400);
 }

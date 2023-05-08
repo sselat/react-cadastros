@@ -21,6 +21,7 @@ import {EditCustomer} from './EditCustomer.js'
 import {toast} from 'react-toastify'
 
 export function CustomersDatatable(props) {
+  const [selectedRow, setSelectedRow] = useState({})
   const [customers, setCustomers] = useState([])
   const [customerToEdit, setCustomerToEdit] = useState({})
   const [filters, setFilters] = useState({
@@ -85,19 +86,39 @@ export function CustomersDatatable(props) {
     }
     loadCustomers()
   }, [])
-
+  // const rowUnselect = () => {
+  //   setSelectedRow({
+  //     name: '',
+  //     birthDate: ''
+  //   })
+  // }
   const renderHeader = () => {
     return (
       <div className="flex justify-content-between">
-        <div>
+        <div className="flex align-items-center gap-3">
+          <span className="text-xl">Selecionado: </span>
+          <div className="flex gap-3">
+            <p
+              className="p-inputtext"
+              style={{width: '300px', height: '40px'}}
+            >
+              {selectedRow?.name}
+            </p>
+            <p
+              className="p-inputtext"
+              style={{width: '300px', height: '40px'}}
+            >
+              {selectedRow?.birthDate}
+            </p>
+          </div>
+        </div>
+        <div className="flex gap-3">
           <Button
-            label="Cadastrar"
+            label="Novo"
             icon="pi pi-plus"
             iconPos="right"
             onClick={() => setCustomerDialog(!customerDialog)}
           />
-        </div>
-        <div>
           <span className="p-input-icon-left">
             <i className="pi pi-search" />
             <InputText
@@ -179,6 +200,10 @@ export function CustomersDatatable(props) {
         loading={loading}
         value={customers}
         filters={filters}
+        selectionMode="single"
+        selection={selectedRow}
+        onSelectionChange={(e) => setSelectedRow(e.value)}
+        metaKeySelection={false}
         paginator
         resizableColumns
         showGridlines
