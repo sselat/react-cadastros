@@ -10,6 +10,7 @@ import {
 } from 'firebase/firestore'
 
 import {DataTable} from 'primereact/datatable'
+import {Calendar} from 'primereact/calendar'
 import {FilterMatchMode} from 'primereact/api'
 import {Column} from 'primereact/column'
 import {InputText} from 'primereact/inputtext'
@@ -180,6 +181,9 @@ export function CustomersDatatable(props) {
       .then(() => toast.info('Excluído com sucesso!'))
       .catch((error) => toast.error('Falha ao excluir o cliente!'))
   }
+  const dateBodyTemplate = (rowData) => {
+    return formatDate(rowData.date)
+  }
   return (
     <div style={props.style}>
       <CustomerDialog
@@ -224,14 +228,16 @@ export function CustomersDatatable(props) {
           filterPlaceholder="Buscar por nome..."
         />
         <Column
+          header="Data de Nascimento"
+          filterField="birthDate"
+          field="birthDate"
+          dataType="date"
           sortable
           headerClassName="text-primary text-lg"
-          field="birthDate"
-          header="Data de Nascimento"
           alignHeader="center"
+          body={dateBodyTemplate}
           filter
-          filterField="birthDate"
-          filterPlaceholder="Buscar por data de nascimento..."
+          filterElement={dateFilterTemplate}
         />
         <Column
           headerClassName="text-primary text-lg"
