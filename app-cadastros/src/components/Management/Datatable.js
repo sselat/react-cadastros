@@ -25,12 +25,7 @@ export function CustomersDatatable(props) {
   const [selectedRow, setSelectedRow] = useState({})
   const [customers, setCustomers] = useState([])
   const [customerToEdit, setCustomerToEdit] = useState({})
-  const [filters, setFilters] = useState({
-    global: {value: null, matchMode: FilterMatchMode.CONTAINS},
-    name: {value: null, matchMode: FilterMatchMode.CONTAINS},
-    birthDate: {value: null, matchMode: FilterMatchMode.CONTAINS},
-    phone: {value: null, matchMode: FilterMatchMode.CONTAINS}
-  })
+  const [filters, setFilters] = useState(null)
   const [loading, setLoading] = useState(false)
   const [globalFilterValue, setGlobalFilterValue] = useState('')
   const [customerDialog, setCustomerDialog] = useState(false)
@@ -87,12 +82,6 @@ export function CustomersDatatable(props) {
     }
     loadCustomers()
   }, [])
-  // const rowUnselect = () => {
-  //   setSelectedRow({
-  //     name: '',
-  //     birthDate: ''
-  //   })
-  // }
   const renderHeader = () => {
     return (
       <div className="flex justify-content-between">
@@ -181,8 +170,47 @@ export function CustomersDatatable(props) {
       .then(() => toast.info('Excluído com sucesso!'))
       .catch((error) => toast.error('Falha ao excluir o cliente!'))
   }
+  const formatDate = (value) => {
+    const formatedDate = value.toLocaleDateString('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    })
+    return formatedDate
+  }
+
+  const clearFilter = () => {
+    initFilters()
+  }
+
+  const initFilters = () => {
+    setFilters({
+      global: {value: null, matchMode: FilterMatchMode.CONTAINS},
+      name: {value: null, matchMode: FilterMatchMode.CONTAINS},
+      birthDate: {value: null, matchMode: FilterMatchMode.CONTAINS}
+    })
+    setGlobalFilterValue('')
+  }
+
+  const dateFilterTemplate = (options) => {
+    return (
+      <Calendar
+        value={options.value}
+        onChange={(e) => options.filterCallback(e.value, options.index)}
+        dateFormat="dd/mm/yy"
+        placeholder="dd/mm/yyyy"
+        mask="99/99/9999"
+      />
+    )
+  }
+
   const dateBodyTemplate = (rowData) => {
-    return formatDate(rowData.date)
+    const parts = rowData.birthDate.split('/')
+    const year = parseInt(parts[2], 10)
+    const month = parseInt(parts[1], 10) - 1
+    const day = parseInt(parts[0], 10)
+    const date = new Date(year, month, day)
+    return formatDate(date)
   }
   return (
     <div style={props.style}>
@@ -231,7 +259,6 @@ export function CustomersDatatable(props) {
           header="Data de Nascimento"
           filterField="birthDate"
           field="birthDate"
-          dataType="date"
           sortable
           headerClassName="text-primary text-lg"
           alignHeader="center"
