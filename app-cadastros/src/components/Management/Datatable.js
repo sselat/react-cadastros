@@ -1,14 +1,5 @@
 import {useState, useEffect} from 'react'
-import {db} from '../../services/FirebaseServices'
-import {
-  collection,
-  onSnapshot,
-  query,
-  orderBy,
-  doc,
-  deleteDoc
-} from 'firebase/firestore'
-
+import useApi from '../../services/useApi'
 import {DataTable} from 'primereact/datatable'
 import {Calendar} from 'primereact/calendar'
 import {FilterMatchMode} from 'primereact/api'
@@ -22,6 +13,7 @@ import {EditCustomer} from './EditCustomer.js'
 import {toast} from 'react-toastify'
 
 export function CustomersDatatable(props) {
+  const apiService = useApi()
   const [selectedRow, setSelectedRow] = useState({})
   const [customers, setCustomers] = useState([])
   const [customerToEdit, setCustomerToEdit] = useState({})
@@ -44,41 +36,33 @@ export function CustomersDatatable(props) {
   useEffect(() => {
     setLoading(true)
     async function loadCustomers() {
-      const tarefaRef = collection(db, 'clientes')
-      const q = query(tarefaRef, orderBy('name', 'desc'))
-
-      onSnapshot(q, (snapshot) => {
-        const lista = []
-
-        snapshot.forEach((doc) => {
-          lista.push({
-            id: doc.id,
-            name: doc.data().name,
-            birthDate: doc.data().birthDate,
-            phone: doc
-              .data()
-              .phone.replace(/[^\w\s]/gi, '')
-              .replace(/\s/gi, ''),
-            optionalPhone: doc
-              .data()
-              .optionalPhone.replace(/[^\w\s]/gi, '')
-              .replace(/\s/gi, ''),
-            cpf: doc.data().cpf,
-            gender: doc.data().gender,
-            createdBy: doc.data().createdBy,
-            cep: doc.data().cep,
-            logradouro: doc.data().logradouro,
-            houseNumber: doc.data().houseNumber,
-            bairro: doc.data().bairro,
-            complemento: doc.data().complemento,
-            cidade: doc.data().cidade,
-            uf: doc.data().uf,
-            customGender: doc.data().customGender
-          })
-        })
-        setCustomers(lista)
-        setLoading(false)
+      const lista = []
+      const snapshot = await apiService.get().then((response) => {
+        return response.data || []
       })
+      snapshot.forEach((doc) => {
+        lista.push({
+          id: doc.id,
+          name: doc.name,
+          birthDate: formatDate(doc.birthDate),
+          phone: doc.phone.replace(/[^\w\s]/gi, '').replace(/\s/gi, ''),
+          optionalPhone: doc.optionalPhone
+            .replace(/[^\w\s]/gi, '')
+            .replace(/\s/gi, ''),
+          cpf: doc.cpf,
+          gender: doc.gender,
+          createdBy: doc.createdBy,
+          cep: doc.cep,
+          logradouro: doc.logradouro,
+          houseNumber: doc.houseNumber,
+          bairro: doc.bairro,
+          complemento: doc.complemento,
+          cidade: doc.cidade,
+          uf: doc.uf
+        })
+      })
+      setCustomers(lista)
+      setLoading(false)
     }
     loadCustomers()
   }, [])
@@ -165,17 +149,19 @@ export function CustomersDatatable(props) {
   }
 
   const deleteCustomer = async (data) => {
-    const docRef = doc(db, 'clientes', data.id)
-    await deleteDoc(docRef)
+    await apiService
+      .destroy(data.id)
       .then(() => toast.info('Excluído com sucesso!'))
       .catch((error) => toast.error('Falha ao excluir o cliente!'))
   }
   const formatDate = (value) => {
-    const formatedDate = value.toLocaleDateString('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
-    })
+    const date = new Date(value)
+
+    const dia = date.getDate().toString().padStart(2, '0')
+    const mes = (date.getMonth() + 1).toString().padStart(2, '0')
+    const ano = date.getFullYear().toString()
+
+    const formatedDate = `${dia}/${mes}/${ano}`
     return formatedDate
   }
 
@@ -205,12 +191,7 @@ export function CustomersDatatable(props) {
   }
 
   const dateBodyTemplate = (rowData) => {
-    const parts = rowData.birthDate.split('/')
-    const year = parseInt(parts[2], 10)
-    const month = parseInt(parts[1], 10) - 1
-    const day = parseInt(parts[0], 10)
-    const date = new Date(year, month, day)
-    return formatDate(date)
+    return formatDate(rowData.birthDate)
   }
   return (
     <div style={props.style}>
@@ -264,7 +245,6 @@ export function CustomersDatatable(props) {
           alignHeader="center"
           body={dateBodyTemplate}
           filter
-          filterElement={dateFilterTemplate}
         />
         <Column
           headerClassName="text-primary text-lg"
