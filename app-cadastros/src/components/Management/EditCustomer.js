@@ -13,9 +13,7 @@ import {Divider} from 'primereact/divider'
 import {toast as toastify} from 'react-toastify'
 
 export function EditCustomer(props) {
-  const [customerDetails, setCustomerDetails] = useState({
-    ...props.customerToEdit
-  })
+  const [customerDetails, setCustomerDetails] = useState({})
   const [validInput, setValidInput] = useState({
     name: true,
     cpf: true,
@@ -41,15 +39,15 @@ export function EditCustomer(props) {
   useEffect(() => {
     function checarCep() {
       if (!customerDetails.cep) {
-        setCustomerDetails({
-          ...customerDetails,
+        setCustomerDetails((prevDetails) => ({
+          ...prevDetails,
           logradouro: '',
           houseNumber: '',
           bairro: '',
           complemento: '',
           cidade: '',
           uf: ''
-        })
+        }))
         setAddressFields(true)
         setIsCepValid(true)
       }
@@ -58,24 +56,19 @@ export function EditCustomer(props) {
   }, [customerDetails.cep])
 
   useEffect(() => {
-    function createCustomGender() {
-      if (customGender) {
-        setCustomerDetails((prevState) => ({
-          ...prevState,
-          gender: ''
-        }))
-      }
-    }
-    createCustomGender()
-  }, [customGender])
-
-  useEffect(() => {
     setUser(props.user)
   }, [props.user])
 
   useEffect(() => {
+    if (
+      props.customerToEdit.gender !== 'Masculino' &&
+      props.customerToEdit.gender !== 'Feminino'
+    ) {
+      setCustomGender(true)
+    } else {
+      setCustomGender(false)
+    }
     setCustomerDetails(props.customerToEdit)
-    setCustomGender(props.customerToEdit.customGender)
   }, [props.customerToEdit])
 
   async function editCustomer() {
