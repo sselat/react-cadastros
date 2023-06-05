@@ -70,17 +70,6 @@ export function CustomerDialog(props) {
     }
     checarCep()
   }, [customerAddress.cep])
-  useEffect(() => {
-    function createCustomGender() {
-      if (customGender) {
-        setCustomerDetails((prevState) => ({
-          ...prevState,
-          gender: ''
-        }))
-      }
-    }
-    createCustomGender()
-  }, [customGender])
 
   useEffect(() => {
     setUser(props.user)
@@ -90,7 +79,6 @@ export function CustomerDialog(props) {
     const customerInfo = {
       ...customerDetails,
       ...customerAddress,
-      customGender: customGender,
       createdBy: user
     }
     await addDoc(collection(db, 'clientes'), customerInfo)
