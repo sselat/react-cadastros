@@ -37,28 +37,28 @@ export function CustomersDatatable(props) {
     setLoading(true)
     async function loadCustomers() {
       const lista = []
-      const snapshot = await apiService.get().then((response) => {
+      const data = await apiService.get().then((response) => {
         return response.data || []
       })
-      snapshot.forEach((doc) => {
+      data.forEach((item) => {
         lista.push({
-          id: doc.id,
-          name: doc.name,
-          birthDate: formatDate(doc.birthDate),
-          phone: doc.phone.replace(/[^\w\s]/gi, '').replace(/\s/gi, ''),
-          optionalPhone: doc.optionalPhone
+          id: item.id,
+          name: item.name,
+          birthDate: formatDate(item.birthDate),
+          phone: item.phone.replace(/[^\w\s]/gi, '').replace(/\s/gi, ''),
+          optionalPhone: item.optionalPhone
             .replace(/[^\w\s]/gi, '')
             .replace(/\s/gi, ''),
-          cpf: doc.cpf,
-          gender: doc.gender,
-          createdBy: doc.createdBy,
-          cep: doc.cep,
-          logradouro: doc.logradouro,
-          houseNumber: doc.houseNumber,
-          bairro: doc.bairro,
-          complemento: doc.complemento,
-          cidade: doc.cidade,
-          uf: doc.uf
+          cpf: item.cpf,
+          gender: item.gender,
+          createdBy: item.createdBy,
+          cep: item.cep,
+          logradouro: item.logradouro,
+          houseNumber: item.houseNumber,
+          bairro: item.bairro,
+          complemento: item.complemento,
+          cidade: item.cidade,
+          uf: item.uf
         })
       })
       setCustomers(lista)
@@ -151,7 +151,9 @@ export function CustomersDatatable(props) {
   const deleteCustomer = async (data) => {
     await apiService
       .destroy(data.id)
-      .then(() => toast.info('Excluído com sucesso!'))
+      .then(() => {
+        toast.info('Excluído com sucesso!')
+      })
       .catch((error) => toast.error('Falha ao excluir o cliente!'))
   }
   const formatDate = (value) => {
@@ -163,31 +165,6 @@ export function CustomersDatatable(props) {
 
     const formatedDate = `${dia}/${mes}/${ano}`
     return formatedDate
-  }
-
-  const clearFilter = () => {
-    initFilters()
-  }
-
-  const initFilters = () => {
-    setFilters({
-      global: {value: null, matchMode: FilterMatchMode.CONTAINS},
-      name: {value: null, matchMode: FilterMatchMode.CONTAINS},
-      birthDate: {value: null, matchMode: FilterMatchMode.CONTAINS}
-    })
-    setGlobalFilterValue('')
-  }
-
-  const dateFilterTemplate = (options) => {
-    return (
-      <Calendar
-        value={options.value}
-        onChange={(e) => options.filterCallback(e.value, options.index)}
-        dateFormat="dd/mm/yy"
-        placeholder="dd/mm/yyyy"
-        mask="99/99/9999"
-      />
-    )
   }
 
   const dateBodyTemplate = (rowData) => {
