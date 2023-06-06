@@ -1,6 +1,5 @@
 import {useState, useEffect, useRef} from 'react'
-import {db} from '../../services/FirebaseServices'
-import {addDoc, collection} from 'firebase/firestore'
+import useApi from '../../services/useApi'
 
 import {InputText} from 'primereact/inputtext'
 import {InputMask} from 'primereact/inputmask'
@@ -13,6 +12,8 @@ import {Divider} from 'primereact/divider'
 import {toast as toastify} from 'react-toastify'
 
 export function CustomerDialog(props) {
+  const apiService = useApi()
+
   const [customerDetails, setCustomerDetails] = useState({
     name: '',
     cpf: '',
@@ -76,12 +77,35 @@ export function CustomerDialog(props) {
   }, [props.user])
 
   async function registerCustomer() {
-    const customerInfo = {
+    const formatDate = (dateString) => {
+      const [day, month, year] = dateString.split('/')
+      return `${month}-${day}-${year}`
+    }
+
+    const adjustDate = () => {
+      const dataOriginal = new Date(
+        formatDate(customerDetails.birthDate)
+      ).toISOString()
+      const partes = dataOriginal.split('-')
+      const diaMes = partes[2].split('T')[0]
+      const novoFormato = `${partes[0]}-${diaMes}-${partes[1]}T${
+        partes[2].split('T')[1]
+      }`
+      console.log(novoFormato)
+      return novoFormato
+    }
+    const customerDetailsWithFormattedDate = {
       ...customerDetails,
+      birthDate: adjustDate()
+    }
+
+    const customerInfo = {
+      ...customerDetailsWithFormattedDate,
       ...customerAddress,
       createdBy: user
     }
-    await addDoc(collection(db, 'clientes'), customerInfo)
+    await apiService
+      .create(customerInfo)
       .then(() => {
         toastify.success('Cliente cadastrado com sucesso!')
         closeDialog()

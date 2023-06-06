@@ -1,8 +1,6 @@
-import {useState, useEffect} from 'react'
+import {useEffect, useState} from 'react'
 import useApi from '../../services/useApi'
 import {DataTable} from 'primereact/datatable'
-import {Calendar} from 'primereact/calendar'
-import {FilterMatchMode} from 'primereact/api'
 import {Column} from 'primereact/column'
 import {InputText} from 'primereact/inputtext'
 import {Button} from 'primereact/button'
@@ -32,38 +30,38 @@ export function CustomersDatatable(props) {
     setFilters(_filters)
     setGlobalFilterValue(value)
   }
+  async function loadCustomers() {
+    setLoading(true)
+    const lista = []
+    const data = await apiService.get().then((response) => {
+      return response.data || []
+    })
+    data.forEach((item) => {
+      lista.push({
+        id: item.id,
+        name: item.name,
+        birthDate: formatDate(item.birthDate),
+        phone: item.phone.replace(/[^\w\s]/gi, '').replace(/\s/gi, ''),
+        optionalPhone: item.optionalPhone
+          .replace(/[^\w\s]/gi, '')
+          .replace(/\s/gi, ''),
+        cpf: item.cpf,
+        gender: item.gender,
+        createdBy: item.createdBy,
+        cep: item.cep,
+        logradouro: item.logradouro,
+        houseNumber: item.houseNumber,
+        bairro: item.bairro,
+        complemento: item.complemento,
+        cidade: item.cidade,
+        uf: item.uf
+      })
+    })
+    setCustomers(lista)
+    setLoading(false)
+  }
 
   useEffect(() => {
-    setLoading(true)
-    async function loadCustomers() {
-      const lista = []
-      const data = await apiService.get().then((response) => {
-        return response.data || []
-      })
-      data.forEach((item) => {
-        lista.push({
-          id: item.id,
-          name: item.name,
-          birthDate: formatDate(item.birthDate),
-          phone: item.phone.replace(/[^\w\s]/gi, '').replace(/\s/gi, ''),
-          optionalPhone: item.optionalPhone
-            .replace(/[^\w\s]/gi, '')
-            .replace(/\s/gi, ''),
-          cpf: item.cpf,
-          gender: item.gender,
-          createdBy: item.createdBy,
-          cep: item.cep,
-          logradouro: item.logradouro,
-          houseNumber: item.houseNumber,
-          bairro: item.bairro,
-          complemento: item.complemento,
-          cidade: item.cidade,
-          uf: item.uf
-        })
-      })
-      setCustomers(lista)
-      setLoading(false)
-    }
     loadCustomers()
   }, [])
   const renderHeader = () => {
@@ -153,6 +151,7 @@ export function CustomersDatatable(props) {
       .destroy(data.id)
       .then(() => {
         toast.info('Excluído com sucesso!')
+        loadCustomers()
       })
       .catch((error) => toast.error('Falha ao excluir o cliente!'))
   }
@@ -175,13 +174,19 @@ export function CustomersDatatable(props) {
       <CustomerDialog
         user={props.user}
         show={customerDialog}
-        onClose={() => setCustomerDialog(false)}
+        onClose={() => {
+          setCustomerDialog(false)
+          loadCustomers()
+        }}
       />
       <EditCustomer
         user={props.user}
         customerToEdit={customerToEdit}
         show={showEditDialog}
-        onClose={() => setShowEditDialog(false)}
+        onClose={() => {
+          setShowEditDialog(false)
+          loadCustomers()
+        }}
       />
 
       <ConfirmDialog />
