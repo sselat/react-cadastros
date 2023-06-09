@@ -233,7 +233,7 @@ export function EditCustomer(props) {
         <InputText
           disabled
           id="createdBy"
-          value={customerDetails.createdBy?.email}
+          value={customerDetails.createdBy}
         />
         <label htmlFor="name">
           Nome <span className="text-red-500">*</span>
