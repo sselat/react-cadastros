@@ -83,16 +83,10 @@ export function CustomerDialog(props) {
     }
 
     const adjustDate = () => {
-      const dataOriginal = new Date(
+      const formatedDate = new Date(
         formatDate(customerDetails.birthDate)
       ).toISOString()
-      const partes = dataOriginal.split('-')
-      const diaMes = partes[2].split('T')[0]
-      const novoFormato = `${partes[0]}-${diaMes}-${partes[1]}T${
-        partes[2].split('T')[1]
-      }`
-      console.log(novoFormato)
-      return novoFormato
+      return formatedDate
     }
     const customerDetailsWithFormattedDate = {
       ...customerDetails,
@@ -102,7 +96,7 @@ export function CustomerDialog(props) {
     const customerInfo = {
       ...customerDetailsWithFormattedDate,
       ...customerAddress,
-      createdBy: user
+      createdBy: user.email
     }
     await apiService
       .create(customerInfo)

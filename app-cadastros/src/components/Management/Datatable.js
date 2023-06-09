@@ -165,10 +165,6 @@ export function CustomersDatatable(props) {
     const formatedDate = `${dia}/${mes}/${ano}`
     return formatedDate
   }
-
-  const dateBodyTemplate = (rowData) => {
-    return formatDate(rowData.birthDate)
-  }
   return (
     <div style={props.style}>
       <CustomerDialog
@@ -225,7 +221,6 @@ export function CustomersDatatable(props) {
           sortable
           headerClassName="text-primary text-lg"
           alignHeader="center"
-          body={dateBodyTemplate}
           filter
         />
         <Column
