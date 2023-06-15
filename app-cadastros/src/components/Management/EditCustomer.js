@@ -1,6 +1,5 @@
 import {useState, useEffect, useRef} from 'react'
-import {db} from '../../services/FirebaseServices'
-import {updateDoc, doc} from 'firebase/firestore'
+import useApi from '../../services/useApi'
 
 import {InputText} from 'primereact/inputtext'
 import {InputMask} from 'primereact/inputmask'
@@ -13,6 +12,7 @@ import {Divider} from 'primereact/divider'
 import {toast as toastify} from 'react-toastify'
 
 export function EditCustomer(props) {
+  const apiService = useApi()
   const [customerDetails, setCustomerDetails] = useState({})
   const [validInput, setValidInput] = useState({
     name: true,
@@ -72,12 +72,29 @@ export function EditCustomer(props) {
   }, [props.customerToEdit])
 
   async function editCustomer() {
-    const customerInfo = {
-      ...customerDetails,
-      lastEditBy: user.uid
+    const formatDate = (dateString) => {
+      const [day, month, year] = dateString.split('/')
+      return `${month}-${day}-${year}`
     }
-    const docRef = doc(db, 'clientes', customerDetails.id)
-    await updateDoc(docRef, customerInfo)
+
+    const adjustDate = () => {
+      const formatedDate = new Date(
+        formatDate(customerDetails.birthDate)
+      ).toISOString()
+      return formatedDate
+    }
+
+    const customerDetailsWithFormattedDate = {
+      ...customerDetails,
+      birthDate: adjustDate()
+    }
+
+    const customerInfo = {
+      ...customerDetailsWithFormattedDate,
+      lastEditBy: user.email
+    }
+    await apiService
+      .update(customerDetails.id, customerInfo)
       .then(() => {
         toastify.success('Cadastro atualizada!')
         closeDialog('edited')
