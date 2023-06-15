@@ -71,19 +71,18 @@ export function EditCustomer(props) {
     setCustomerDetails(props.customerToEdit)
   }, [props.customerToEdit])
 
+  const formatDate = (dateString) => {
+    const [day, month, year] = dateString.split('/')
+    return `${month}-${day}-${year}`
+  }
+
+  const adjustDate = () => {
+    const formatedDate = new Date(
+      formatDate(customerDetails.birthDate)
+    ).toISOString()
+    return formatedDate
+  }
   async function editCustomer() {
-    const formatDate = (dateString) => {
-      const [day, month, year] = dateString.split('/')
-      return `${month}-${day}-${year}`
-    }
-
-    const adjustDate = () => {
-      const formatedDate = new Date(
-        formatDate(customerDetails.birthDate)
-      ).toISOString()
-      return formatedDate
-    }
-
     const customerDetailsWithFormattedDate = {
       ...customerDetails,
       birthDate: adjustDate()

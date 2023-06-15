@@ -4,31 +4,66 @@ import {DataTable} from 'primereact/datatable'
 import {Column} from 'primereact/column'
 import {InputText} from 'primereact/inputtext'
 import {Button} from 'primereact/button'
+import {Calendar} from 'primereact/calendar'
 import {ConfirmDialog, confirmDialog} from 'primereact/confirmdialog'
-
 import {CustomerDialog} from './CustomerDialog.js'
 import {EditCustomer} from './EditCustomer.js'
 import {toast} from 'react-toastify'
+import {FilterMatchMode, FilterOperator} from 'primereact/api'
 
 export function CustomersDatatable(props) {
   const apiService = useApi()
   const [selectedRow, setSelectedRow] = useState({})
   const [customers, setCustomers] = useState([])
   const [customerToEdit, setCustomerToEdit] = useState({})
-  const [filters, setFilters] = useState(null)
+  const [filters, setFilters] = useState({
+    global: {value: null, matchMode: FilterMatchMode.CONTAINS},
+    name: {
+      operator: FilterOperator.AND,
+      constraints: [{value: null, matchMode: FilterMatchMode.STARTS_WITH}]
+    },
+    birthDate: {
+      operator: FilterOperator.AND,
+      constraints: [{value: null, matchMode: FilterMatchMode.DATE_IS}]
+    },
+    phone: {
+      operator: FilterOperator.OR,
+      constraints: [{value: null, matchMode: FilterMatchMode.EQUALS}]
+    }
+  })
   const [loading, setLoading] = useState(false)
   const [globalFilterValue, setGlobalFilterValue] = useState('')
   const [customerDialog, setCustomerDialog] = useState(false)
   const [showEditDialog, setShowEditDialog] = useState(false)
 
+  const clearFilter = () => {
+    initFilters()
+  }
   const onGlobalFilterChange = (e) => {
     const value = e.target.value
     let _filters = {...filters}
 
     _filters['global'].value = value
-
     setFilters(_filters)
     setGlobalFilterValue(value)
+  }
+  const initFilters = () => {
+    setFilters({
+      global: {value: null, matchMode: FilterMatchMode.CONTAINS},
+      name: {
+        operator: FilterOperator.AND,
+        constraints: [{value: null, matchMode: FilterMatchMode.STARTS_WITH}]
+      },
+      birthDate: {
+        operator: FilterOperator.AND,
+        constraints: [{value: null, matchMode: FilterMatchMode.DATE_IS}]
+      },
+      phone: {
+        operator: FilterOperator.OR,
+        constraints: [{value: null, matchMode: FilterMatchMode.EQUALS}]
+      }
+    })
+    setGlobalFilterValue('')
   }
   async function loadCustomers() {
     setLoading(true)
@@ -40,7 +75,7 @@ export function CustomersDatatable(props) {
       lista.push({
         id: item.id,
         name: item.name,
-        birthDate: formatDate(item.birthDate),
+        birthDate: item.birthDate,
         phone: item.phone.replace(/[^\w\s]/gi, '').replace(/\s/gi, ''),
         optionalPhone: item.optionalPhone
           .replace(/[^\w\s]/gi, '')
@@ -82,14 +117,21 @@ export function CustomersDatatable(props) {
             >
               {selectedRow?.birthDate}
             </p>
+            <Button
+              label="Novo"
+              icon="pi pi-plus"
+              iconPos="right"
+              onClick={() => setCustomerDialog(!customerDialog)}
+            />
           </div>
         </div>
         <div className="flex gap-3">
           <Button
-            label="Novo"
-            icon="pi pi-plus"
-            iconPos="right"
-            onClick={() => setCustomerDialog(!customerDialog)}
+            type="button"
+            icon="pi pi-filter-slash"
+            label="Limpar filtro"
+            outlined
+            onClick={clearFilter}
           />
           <span className="p-input-icon-left">
             <i className="pi pi-search" />
@@ -165,6 +207,27 @@ export function CustomersDatatable(props) {
     const formatedDate = `${dia}/${mes}/${ano}`
     return formatedDate
   }
+
+  const dateFilterTemplate = (options) => {
+    console.log(options)
+    return (
+      <Calendar
+        onChange={(e) => {
+          let parsedDate = new Date(e.value)
+          console.log(parsedDate, typeof parsedDate)
+          options.filterCallback(parsedDate, options.index)
+        }}
+        dateFormat="dd/mm/yy"
+        placeholder="dd/mm/yyyy"
+        mask="99/99/9999"
+      />
+    )
+  }
+
+  const dateBodyTemplate = (rowData) => {
+    return formatDate(rowData.birthDate)
+  }
+
   return (
     <div style={props.style}>
       <CustomerDialog
@@ -201,9 +264,8 @@ export function CustomersDatatable(props) {
         rows={10}
         rowClassName={'justify-content-center'}
         dataKey="id"
-        filterDisplay="row"
-        globalFilterFields={['name']}
-        emptyMessage="Sem clientes cadastrados."
+        globalFilterFields={['name', 'phone']}
+        emptyMessage="Sem clientes encontrados."
       >
         <Column
           sortable
@@ -216,8 +278,11 @@ export function CustomersDatatable(props) {
         />
         <Column
           header="Data de Nascimento"
-          filterField="birthDate"
+          dataType="date"
           field="birthDate"
+          filterField="birthDate"
+          filterElement={dateFilterTemplate}
+          body={dateBodyTemplate}
           sortable
           headerClassName="text-primary text-lg"
           alignHeader="center"
