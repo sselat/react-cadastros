@@ -68,7 +68,10 @@ export function EditCustomer(props) {
     } else {
       setCustomGender(false)
     }
-    setCustomerDetails(props.customerToEdit)
+    setCustomerDetails({
+      ...props.customerToEdit,
+      birthDate: formatBirthDate(props.customerToEdit.birthDate)
+    })
   }, [props.customerToEdit])
 
   const formatDate = (dateString) => {
@@ -173,7 +176,10 @@ export function EditCustomer(props) {
   }
   function closeDialog(callback) {
     if (!callback) {
-      setCustomerDetails(props.customerToEdit)
+      setCustomerDetails({
+        ...props.customerToEdit,
+        birthDate: formatBirthDate(props.customerToEdit.birthDate)
+      })
     }
     setIsCpfValid(true)
     setAddressFields(true)
@@ -229,6 +235,18 @@ export function EditCustomer(props) {
       detail: msg,
       life: 3000
     })
+  }
+
+  const formatBirthDate = (value) => {
+    if (!value) return
+    const date = new Date(value)
+
+    const dia = date.getDate().toString().padStart(2, '0')
+    const mes = (date.getMonth() + 1).toString().padStart(2, '0')
+    const ano = date.getFullYear().toString()
+
+    const formatedDate = `${dia}/${mes}/${ano}`
+    return formatedDate
   }
   return (
     <Dialog

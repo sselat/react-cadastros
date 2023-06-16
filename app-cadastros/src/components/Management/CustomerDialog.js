@@ -257,6 +257,7 @@ export function CustomerDialog(props) {
       life: 3000
     })
   }
+
   return (
     <Dialog
       className="flex flex-column"

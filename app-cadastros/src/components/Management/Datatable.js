@@ -16,25 +16,23 @@ export function CustomersDatatable(props) {
   const [selectedRow, setSelectedRow] = useState({})
   const [customers, setCustomers] = useState([])
   const [customerToEdit, setCustomerToEdit] = useState({})
-  const [filters, setFilters] = useState({
-    global: {value: null, matchMode: FilterMatchMode.CONTAINS},
-    name: {
-      operator: FilterOperator.AND,
-      constraints: [{value: null, matchMode: FilterMatchMode.STARTS_WITH}]
-    },
-    birthDate: {
-      operator: FilterOperator.AND,
-      constraints: [{value: null, matchMode: FilterMatchMode.DATE_IS}]
-    },
-    phone: {
-      operator: FilterOperator.OR,
-      constraints: [{value: null, matchMode: FilterMatchMode.EQUALS}]
-    }
-  })
+  const [filters, setFilters] = useState({})
   const [loading, setLoading] = useState(false)
   const [globalFilterValue, setGlobalFilterValue] = useState('')
   const [customerDialog, setCustomerDialog] = useState(false)
   const [showEditDialog, setShowEditDialog] = useState(false)
+
+  const formatDate = (value) => {
+    if (!value) return
+    const date = new Date(value)
+
+    const dia = date.getDate().toString().padStart(2, '0')
+    const mes = (date.getMonth() + 1).toString().padStart(2, '0')
+    const ano = date.getFullYear().toString()
+
+    const formatedDate = `${dia}/${mes}/${ano}`
+    return formatedDate
+  }
 
   const clearFilter = () => {
     initFilters()
@@ -56,7 +54,7 @@ export function CustomersDatatable(props) {
       },
       birthDate: {
         operator: FilterOperator.AND,
-        constraints: [{value: null, matchMode: FilterMatchMode.DATE_IS}]
+        constraints: [{value: null, matchMode: FilterMatchMode.CONTAINS}]
       },
       phone: {
         operator: FilterOperator.OR,
@@ -98,6 +96,7 @@ export function CustomersDatatable(props) {
 
   useEffect(() => {
     loadCustomers()
+    initFilters()
   }, [])
   const renderHeader = () => {
     return (
@@ -115,7 +114,7 @@ export function CustomersDatatable(props) {
               className="p-inputtext"
               style={{width: '300px', height: '40px'}}
             >
-              {selectedRow?.birthDate}
+              {formatDate(selectedRow?.birthDate) || ''}
             </p>
             <Button
               label="Novo"
@@ -197,24 +196,12 @@ export function CustomersDatatable(props) {
       })
       .catch((error) => toast.error('Falha ao excluir o cliente!'))
   }
-  const formatDate = (value) => {
-    const date = new Date(value)
-
-    const dia = date.getDate().toString().padStart(2, '0')
-    const mes = (date.getMonth() + 1).toString().padStart(2, '0')
-    const ano = date.getFullYear().toString()
-
-    const formatedDate = `${dia}/${mes}/${ano}`
-    return formatedDate
-  }
 
   const dateFilterTemplate = (options) => {
-    console.log(options)
     return (
       <Calendar
         onChange={(e) => {
-          let parsedDate = new Date(e.value)
-          console.log(parsedDate, typeof parsedDate)
+          let parsedDate = e.value.toISOString().split('T')[0]
           options.filterCallback(parsedDate, options.index)
         }}
         dateFormat="dd/mm/yy"
@@ -278,7 +265,6 @@ export function CustomersDatatable(props) {
         />
         <Column
           header="Data de Nascimento"
-          dataType="date"
           field="birthDate"
           filterField="birthDate"
           filterElement={dateFilterTemplate}
