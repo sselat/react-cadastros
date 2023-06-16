@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const resource = 'http://localhost:8088/contatos'
+const resource = 'http://192.168.2.107:8088/contatos'
 
 export default function useApi() {
   const get = () => {
