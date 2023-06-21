@@ -74,7 +74,8 @@ export function EditCustomer(props) {
       setCustomGender(false)
     }
     setCustomerDetails({
-      ...props.customerToEdit
+      ...props.customerToEdit,
+      birthDate: new Date(props.customerToEdit.birthDate)
     })
   }, [props.customerToEdit])
 
@@ -297,12 +298,13 @@ export function EditCustomer(props) {
           </label>
           <Calendar
             value={customerDetails.birthDate}
-            onChange={(e) =>
+            onChange={(e) => {
+              console.log(typeof e.target.value)
               setCustomerDetails((prevState) => ({
                 ...prevState,
                 birthDate: e.target.value
               }))
-            }
+            }}
             minDate={minDate}
             maxDate={maxDate}
             dateFormat="dd/mm/yy"
