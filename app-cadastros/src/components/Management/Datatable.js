@@ -206,6 +206,8 @@ export function CustomersDatatable(props) {
         }}
         dateFormat="dd/mm/yy"
         placeholder="dd/mm/yyyy"
+        minDate={minDate}
+        maxDate={maxDate}
         mask="99/99/9999"
       />
     )
@@ -214,6 +216,9 @@ export function CustomersDatatable(props) {
   const dateBodyTemplate = (rowData) => {
     return formatDate(rowData.birthDate)
   }
+
+  const maxDate = new Date()
+  const minDate = new Date('1900-01-01')
 
   return (
     <div style={props.style}>

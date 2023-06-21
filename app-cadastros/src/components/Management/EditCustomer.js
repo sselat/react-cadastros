@@ -10,6 +10,7 @@ import {RadioButton} from 'primereact/radiobutton'
 import {Divider} from 'primereact/divider'
 
 import {toast as toastify} from 'react-toastify'
+import {Calendar} from 'primereact/calendar'
 
 export function EditCustomer(props) {
   const apiService = useApi()
@@ -36,6 +37,10 @@ export function EditCustomer(props) {
   const [user, setUser] = useState({})
 
   const toast = useRef(null)
+
+  const maxDate = new Date()
+  const minDate = new Date('1900-01-01')
+
   useEffect(() => {
     function checarCep() {
       if (!customerDetails.cep) {
@@ -70,29 +75,13 @@ export function EditCustomer(props) {
     }
     setCustomerDetails({
       ...props.customerToEdit,
-      birthDate: formatBirthDate(props.customerToEdit.birthDate)
+      birthDate: new Date(props.customerToEdit.birthDate)
     })
   }, [props.customerToEdit])
 
-  const formatDate = (dateString) => {
-    const [day, month, year] = dateString.split('/')
-    return `${month}-${day}-${year}`
-  }
-
-  const adjustDate = () => {
-    const formatedDate = new Date(
-      formatDate(customerDetails.birthDate)
-    ).toISOString()
-    return formatedDate
-  }
   async function editCustomer() {
-    const customerDetailsWithFormattedDate = {
-      ...customerDetails,
-      birthDate: adjustDate()
-    }
-
     const customerInfo = {
-      ...customerDetailsWithFormattedDate,
+      ...customerDetails,
       lastEditBy: user.email
     }
     await apiService
@@ -177,8 +166,7 @@ export function EditCustomer(props) {
   function closeDialog(callback) {
     if (!callback) {
       setCustomerDetails({
-        ...props.customerToEdit,
-        birthDate: formatBirthDate(props.customerToEdit.birthDate)
+        ...props.customerToEdit
       })
     }
     setIsCpfValid(true)
@@ -308,18 +296,18 @@ export function EditCustomer(props) {
           <label htmlFor="birthDate">
             Nascimento <span className="text-red-500">*</span>
           </label>
-          <InputMask
-            style={validInput.birthDate ? {} : {borderColor: 'var(--red-500)'}}
-            mask="99/99/9999"
-            placeholder="dd/mm/aaaa"
-            id="birthDate"
+          <Calendar
             value={customerDetails.birthDate}
-            onChange={(e) =>
+            onChange={(e) => {
+              console.log(typeof e.target.value)
               setCustomerDetails((prevState) => ({
                 ...prevState,
                 birthDate: e.target.value
               }))
-            }
+            }}
+            minDate={minDate}
+            maxDate={maxDate}
+            dateFormat="dd/mm/yy"
           />
         </div>
       </div>
