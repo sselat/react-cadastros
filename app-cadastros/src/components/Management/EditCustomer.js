@@ -276,6 +276,7 @@ export function EditCustomer(props) {
           style={validInput.name ? {} : {borderColor: 'var(--red-500)'}}
           placeholder="Digite o seu nome completo"
           id="name"
+          keyfilter={/^[A-Za-z\s]+$/}
           value={customerDetails.name}
           onChange={(e) =>
             setCustomerDetails((prevState) => ({
