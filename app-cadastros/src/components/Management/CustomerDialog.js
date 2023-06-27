@@ -8,6 +8,7 @@ import {Dialog} from 'primereact/dialog'
 import {Toast} from 'primereact/toast'
 import {RadioButton} from 'primereact/radiobutton'
 import {Divider} from 'primereact/divider'
+import {Calendar} from 'primereact/calendar'
 
 import {toast as toastify} from 'react-toastify'
 
@@ -54,6 +55,9 @@ export function CustomerDialog(props) {
 
   const toast = useRef(null)
 
+  const maxDate = new Date()
+  const minDate = new Date('1900-01-01')
+
   useEffect(() => {
     function checarCep() {
       if (!customerAddress.cep) {
@@ -77,24 +81,8 @@ export function CustomerDialog(props) {
   }, [props.user])
 
   async function registerCustomer() {
-    const formatDate = (dateString) => {
-      const [day, month, year] = dateString.split('/')
-      return `${month}-${day}-${year}`
-    }
-
-    const adjustDate = () => {
-      const formatedDate = new Date(
-        formatDate(customerDetails.birthDate)
-      ).toISOString()
-      return formatedDate
-    }
-    const customerDetailsWithFormattedDate = {
-      ...customerDetails,
-      birthDate: adjustDate()
-    }
-
     const customerInfo = {
-      ...customerDetailsWithFormattedDate,
+      ...customerDetails,
       ...customerAddress,
       createdBy: user.email
     }
@@ -313,11 +301,7 @@ export function CustomerDialog(props) {
           <label htmlFor="birthDate">
             Nascimento <span className="text-red-500">*</span>
           </label>
-          <InputMask
-            style={validInput.birthDate ? {} : {borderColor: 'var(--red-500)'}}
-            mask="99/99/9999"
-            placeholder="dd/mm/aaaa"
-            id="birthDate"
+          <Calendar
             value={customerDetails.birthDate}
             onChange={(e) =>
               setCustomerDetails((prevState) => ({
@@ -325,6 +309,9 @@ export function CustomerDialog(props) {
                 birthDate: e.target.value
               }))
             }
+            minDate={minDate}
+            maxDate={maxDate}
+            dateFormat="dd/mm/yy"
           />
         </div>
       </div>
